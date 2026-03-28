@@ -2,10 +2,12 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import HolographicScene from '@/components/HolographicScene';
 import HudOverlay from '@/components/HudOverlay';
 import WebcamPreview from '@/components/WebcamPreview';
+import MicButton from '@/components/MicButton';
 import { useMediaPipe } from '@/hooks/useMediaPipe';
+import { useVoiceAssistant, ModelCommand, ModelState } from '@/hooks/useVoiceAssistant';
 
 const BASE_SCALE = 1;
-const SCALE_MULTIPLIER = 3;
+const DEFAULT_COLOR = '#00ffff';
 
 export default function Index() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -13,6 +15,48 @@ export default function Index() {
   const [scale, setScale] = useState(BASE_SCALE);
   const initialDistRef = useRef<number | null>(null);
   const initialScaleRef = useRef(BASE_SCALE);
+
+  // Voice-controllable model state
+  const [color, setColor] = useState(DEFAULT_COLOR);
+  const [wireframe, setWireframe] = useState(true);
+  const [commandRotation, setCommandRotation] = useState({ x: 0, y: 0, z: 0 });
+
+  const modelState: ModelState = {
+    color,
+    wireframe,
+    rotationX: commandRotation.x,
+    rotationY: commandRotation.y,
+    rotationZ: commandRotation.z,
+    scale,
+  };
+
+  const handleCommands = useCallback((cmds: ModelCommand[]) => {
+    for (const cmd of cmds) {
+      switch (cmd.name) {
+        case 'setRotation': {
+          const axis = cmd.args.axis as string;
+          const degrees = cmd.args.degrees as number;
+          setCommandRotation((prev) => ({ ...prev, [axis]: degrees }));
+          break;
+        }
+        case 'setColor':
+          setColor(cmd.args.hexCode as string);
+          break;
+        case 'toggleWireframe':
+          setWireframe(cmd.args.enabled as boolean);
+          break;
+        case 'resetView':
+          setColor(DEFAULT_COLOR);
+          setWireframe(true);
+          setCommandRotation({ x: 0, y: 0, z: 0 });
+          setScale(BASE_SCALE);
+          break;
+      }
+    }
+  }, []);
+
+  const { isListening, isSpeaking, cooldown, lastResponse, toggleListening } =
+    useVoiceAssistant(modelState, handleCommands);
 
   // Start webcam
   useEffect(() => {
@@ -46,7 +90,6 @@ export default function Index() {
         initialScaleRef.current = scale;
       }
       const ratio = tracking.handsDistance / initialDistRef.current;
-      const newScale = Math.max(0.3, Math.min(5, initialScaleRef.current * ratio * SCALE_MULTIPLIER / SCALE_MULTIPLIER * ratio));
       setScale(initialScaleRef.current * ratio);
     } else {
       initialDistRef.current = null;
@@ -59,6 +102,9 @@ export default function Index() {
         headX={tracking.headX}
         headY={tracking.headY}
         scale={scale}
+        color={color}
+        wireframe={wireframe}
+        commandRotation={commandRotation}
       />
       <HudOverlay
         isTracking={tracking.isTracking}
@@ -71,6 +117,13 @@ export default function Index() {
         onCalibrate={calibrate}
       />
       <WebcamPreview ref={videoRef} isTracking={tracking.isTracking} />
+      <MicButton
+        isListening={isListening}
+        isSpeaking={isSpeaking}
+        cooldown={cooldown}
+        lastResponse={lastResponse}
+        onToggle={toggleListening}
+      />
     </div>
   );
 }

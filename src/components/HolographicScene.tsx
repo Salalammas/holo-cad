@@ -7,9 +7,12 @@ interface HoloModelProps {
   headX: number;
   headY: number;
   scale: number;
+  color: string;
+  wireframe: boolean;
+  commandRotation: { x: number; y: number; z: number };
 }
 
-function HoloModel({ headX, headY, scale }: HoloModelProps) {
+function HoloModel({ headX, headY, scale, color, wireframe, commandRotation }: HoloModelProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const targetRotation = useRef({ x: 0, y: 0 });
 
@@ -33,11 +36,13 @@ function HoloModel({ headX, headY, scale }: HoloModelProps) {
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
-    targetRotation.current.y = headX * 0.6;
-    targetRotation.current.x = headY * 0.4;
+    // Head-tracking parallax
+    targetRotation.current.y = headX * 0.6 + THREE.MathUtils.degToRad(commandRotation.y);
+    targetRotation.current.x = headY * 0.4 + THREE.MathUtils.degToRad(commandRotation.x);
 
     meshRef.current.rotation.y += (targetRotation.current.y - meshRef.current.rotation.y) * delta * 3;
     meshRef.current.rotation.x += (targetRotation.current.x - meshRef.current.rotation.x) * delta * 3;
+    meshRef.current.rotation.z = THREE.MathUtils.degToRad(commandRotation.z);
     meshRef.current.rotation.y += delta * 0.15;
   });
 
@@ -46,8 +51,8 @@ function HoloModel({ headX, headY, scale }: HoloModelProps) {
   return (
     <mesh ref={meshRef} geometry={centeredGeometry} scale={[finalScale, finalScale, finalScale]}>
       <meshBasicMaterial
-        color="#00ffff"
-        wireframe
+        color={color}
+        wireframe={wireframe}
         transparent
         opacity={0.8}
       />
@@ -68,9 +73,12 @@ interface HolographicSceneProps {
   headX: number;
   headY: number;
   scale: number;
+  color: string;
+  wireframe: boolean;
+  commandRotation: { x: number; y: number; z: number };
 }
 
-export default function HolographicScene({ headX, headY, scale }: HolographicSceneProps) {
+export default function HolographicScene({ headX, headY, scale, color, wireframe, commandRotation }: HolographicSceneProps) {
   return (
     <Canvas
       camera={{ position: [0, 1, 6], fov: 50 }}
@@ -78,7 +86,7 @@ export default function HolographicScene({ headX, headY, scale }: HolographicSce
       gl={{ antialias: true, alpha: false }}
     >
       <ambientLight intensity={0.1} />
-      <HoloModel headX={headX} headY={headY} scale={scale} />
+      <HoloModel headX={headX} headY={headY} scale={scale} color={color} wireframe={wireframe} commandRotation={commandRotation} />
       <GridFloor />
     </Canvas>
   );
