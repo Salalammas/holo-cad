@@ -1,49 +1,56 @@
-import { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Edges } from '@react-three/drei';
+import { useRef, useMemo } from 'react';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 
-interface HoloBoxProps {
+interface HoloModelProps {
   headX: number;
   headY: number;
   scale: number;
 }
 
-function HoloBox({ headX, headY, scale }: HoloBoxProps) {
+function HoloModel({ headX, headY, scale }: HoloModelProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const targetRotation = useRef({ x: 0, y: 0 });
 
+  const geometry = useLoader(STLLoader, '/models/piston_rod.stl');
+
+  const centeredGeometry = useMemo(() => {
+    const geo = geometry.clone();
+    geo.center();
+    geo.computeBoundingBox();
+    return geo;
+  }, [geometry]);
+
+  const autoScale = useMemo(() => {
+    const box = new THREE.Box3().setFromBufferAttribute(
+      centeredGeometry.getAttribute('position') as THREE.BufferAttribute
+    );
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    return maxDim > 0 ? 5 / maxDim : 1;
+  }, [centeredGeometry]);
+
   useFrame((_, delta) => {
     if (!meshRef.current) return;
-    // Smooth parallax rotation based on head position
     targetRotation.current.y = headX * 0.6;
     targetRotation.current.x = headY * 0.4;
 
     meshRef.current.rotation.y += (targetRotation.current.y - meshRef.current.rotation.y) * delta * 3;
     meshRef.current.rotation.x += (targetRotation.current.x - meshRef.current.rotation.x) * delta * 3;
-
-    // Idle rotation
     meshRef.current.rotation.y += delta * 0.15;
   });
 
+  const finalScale = autoScale * scale;
+
   return (
-    <mesh ref={meshRef} scale={[scale, scale, scale]}>
-      <boxGeometry args={[2, 2, 2]} />
-      <meshBasicMaterial transparent opacity={0} />
-      <Edges
-        threshold={15}
+    <mesh ref={meshRef} geometry={centeredGeometry} scale={[finalScale, finalScale, finalScale]}>
+      <meshBasicMaterial
         color="#00ffff"
+        wireframe
+        transparent
+        opacity={0.8}
       />
-      {/* Glow layer */}
-      <mesh scale={[1.02, 1.02, 1.02]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshBasicMaterial
-          color="#00ffff"
-          wireframe
-          transparent
-          opacity={0.15}
-        />
-      </mesh>
     </mesh>
   );
 }
@@ -71,7 +78,7 @@ export default function HolographicScene({ headX, headY, scale }: HolographicSce
       gl={{ antialias: true, alpha: false }}
     >
       <ambientLight intensity={0.1} />
-      <HoloBox headX={headX} headY={headY} scale={scale} />
+      <HoloModel headX={headX} headY={headY} scale={scale} />
       <GridFloor />
     </Canvas>
   );
