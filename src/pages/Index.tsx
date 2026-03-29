@@ -60,8 +60,9 @@ export default function Index() {
   const { isListening, isSpeaking, cooldown, lastResponse, toggleListening } =
     useVoiceAssistant(modelState, handleCommands);
 
-  // Start webcam
+  // Start webcam only after onboarding
   useEffect(() => {
+    if (!started) return;
     async function startCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -80,7 +81,7 @@ export default function Index() {
         (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
       }
     };
-  }, []);
+  }, [started]);
 
   // Pinch-to-scale logic
   useEffect(() => {
