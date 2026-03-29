@@ -64,7 +64,7 @@ function GridFloor() {
   return (
     <gridHelper
       args={[20, 20, '#00ffff', '#004444']}
-      position={[0, -2.5, 0]}
+      position={[0, -3, 0]}
     />
   );
 }
