@@ -101,6 +101,8 @@ export default function Index() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
+      {!started && <OnboardingModal onStart={() => setStarted(true)} />}
+      <div className={!started ? 'blur-sm pointer-events-none' : ''}>
       <HolographicScene
         headX={tracking.headX}
         headY={tracking.headY}
