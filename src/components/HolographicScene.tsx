@@ -49,7 +49,7 @@ function HoloModel({ headX, headY, scale, color, wireframe, commandRotation }: H
   const finalScale = autoScale * scale;
 
   return (
-    <mesh ref={meshRef} geometry={centeredGeometry} scale={[finalScale, finalScale, finalScale]} position={[0, 1, 0]}>
+    <mesh ref={meshRef} geometry={centeredGeometry} scale={[finalScale, finalScale, finalScale]} position={[0, 0, 0]}>
       <meshBasicMaterial
         color={color}
         wireframe={wireframe}
@@ -64,7 +64,7 @@ function GridFloor() {
   return (
     <gridHelper
       args={[20, 20, '#00ffff', '#004444']}
-      position={[0, -2.5, 0]}
+      position={[0, -3, 0]}
     />
   );
 }
@@ -81,7 +81,7 @@ interface HolographicSceneProps {
 export default function HolographicScene({ headX, headY, scale, color, wireframe, commandRotation }: HolographicSceneProps) {
   return (
     <Canvas
-      camera={{ position: [0, 1, 6], fov: 50 }}
+      camera={{ position: [0, 0, 6], fov: 50 }}
       style={{ background: '#000000', width: '100%', height: '100%' }}
       gl={{ antialias: true, alpha: false }}
     >
