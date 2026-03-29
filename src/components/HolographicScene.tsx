@@ -81,7 +81,7 @@ interface HolographicSceneProps {
 export default function HolographicScene({ headX, headY, scale, color, wireframe, commandRotation }: HolographicSceneProps) {
   return (
     <Canvas
-      camera={{ position: [0, 1, 6], fov: 50 }}
+      camera={{ position: [0, 0, 6], fov: 50 }}
       style={{ background: '#000000', width: '100%', height: '100%' }}
       gl={{ antialias: true, alpha: false }}
     >
