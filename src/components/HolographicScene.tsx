@@ -49,7 +49,7 @@ function HoloModel({ headX, headY, scale, color, wireframe, commandRotation }: H
   const finalScale = autoScale * scale;
 
   return (
-    <mesh ref={meshRef} geometry={centeredGeometry} scale={[finalScale, finalScale, finalScale]}>
+    <mesh ref={meshRef} geometry={centeredGeometry} scale={[finalScale, finalScale, finalScale]} position={[0, 1, 0]}>
       <meshBasicMaterial
         color={color}
         wireframe={wireframe}
