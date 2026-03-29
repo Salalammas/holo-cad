@@ -78,13 +78,23 @@ interface HolographicSceneProps {
   commandRotation: { x: number; y: number; z: number };
 }
 
+function CameraSetup() {
+  const { camera } = useThree();
+  useEffect(() => {
+    camera.position.set(0, 2, 8);
+    camera.lookAt(0, -1, 0);
+    camera.updateProjectionMatrix();
+  }, [camera]);
+  return null;
+}
+
 export default function HolographicScene({ headX, headY, scale, color, wireframe, commandRotation }: HolographicSceneProps) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 6], fov: 50 }}
       style={{ background: '#000000', width: '100%', height: '100%' }}
       gl={{ antialias: true, alpha: false }}
     >
+      <CameraSetup />
       <ambientLight intensity={0.1} />
       <HoloModel headX={headX} headY={headY} scale={scale} color={color} wireframe={wireframe} commandRotation={commandRotation} />
       <GridFloor />
