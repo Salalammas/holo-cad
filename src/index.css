@@ -67,3 +67,8 @@ All colors MUST be HSL.
     font-family: var(--font-mono);
   }
 }
+
+@keyframes glitch-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}

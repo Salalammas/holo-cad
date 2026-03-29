@@ -129,6 +129,7 @@ export default function Index() {
         lastResponse={lastResponse}
         onToggle={toggleListening}
       />
+      </div>
     </div>
   );
 }
