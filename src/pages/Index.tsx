@@ -3,6 +3,7 @@ import HolographicScene from '@/components/HolographicScene';
 import HudOverlay from '@/components/HudOverlay';
 import WebcamPreview from '@/components/WebcamPreview';
 import MicButton from '@/components/MicButton';
+import OnboardingModal from '@/components/OnboardingModal';
 import { useMediaPipe } from '@/hooks/useMediaPipe';
 import { useVoiceAssistant, ModelCommand, ModelState } from '@/hooks/useVoiceAssistant';
 
