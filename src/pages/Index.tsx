@@ -3,6 +3,7 @@ import HolographicScene from '@/components/HolographicScene';
 import HudOverlay from '@/components/HudOverlay';
 import WebcamPreview from '@/components/WebcamPreview';
 import MicButton from '@/components/MicButton';
+import OnboardingModal from '@/components/OnboardingModal';
 import { useMediaPipe } from '@/hooks/useMediaPipe';
 import { useVoiceAssistant, ModelCommand, ModelState } from '@/hooks/useVoiceAssistant';
 
@@ -15,6 +16,7 @@ export default function Index() {
   const [scale, setScale] = useState(BASE_SCALE);
   const initialDistRef = useRef<number | null>(null);
   const initialScaleRef = useRef(BASE_SCALE);
+  const [started, setStarted] = useState(false);
 
   // Voice-controllable model state
   const [color, setColor] = useState(DEFAULT_COLOR);
@@ -58,8 +60,9 @@ export default function Index() {
   const { isListening, isSpeaking, cooldown, lastResponse, toggleListening } =
     useVoiceAssistant(modelState, handleCommands);
 
-  // Start webcam
+  // Start webcam only after onboarding
   useEffect(() => {
+    if (!started) return;
     async function startCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -78,7 +81,7 @@ export default function Index() {
         (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
       }
     };
-  }, []);
+  }, [started]);
 
   // Pinch-to-scale logic
   useEffect(() => {
@@ -98,6 +101,8 @@ export default function Index() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
+      {!started && <OnboardingModal onStart={() => setStarted(true)} />}
+      <div className={!started ? 'blur-sm pointer-events-none' : ''}>
       <HolographicScene
         headX={tracking.headX}
         headY={tracking.headY}
@@ -124,6 +129,7 @@ export default function Index() {
         lastResponse={lastResponse}
         onToggle={toggleListening}
       />
+      </div>
     </div>
   );
 }
