@@ -16,6 +16,7 @@ export default function Index() {
   const [scale, setScale] = useState(BASE_SCALE);
   const initialDistRef = useRef<number | null>(null);
   const initialScaleRef = useRef(BASE_SCALE);
+  const [started, setStarted] = useState(false);
 
   // Voice-controllable model state
   const [color, setColor] = useState(DEFAULT_COLOR);
